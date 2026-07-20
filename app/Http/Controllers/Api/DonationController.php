@@ -125,12 +125,26 @@ class DonationController extends Controller
         }
 
         $result = $this->paystack->verify($donation->paystack_reference);
+
+        if (! ($result['ok'] ?? false)) {
+            return response()->json([
+                'message' => 'Paystack verify call failed',
+                'paystack_status_code' => $result['status'] ?? null,
+                'paystack_body' => $result['body'] ?? null,
+            ], 502);
+        }
+
         $status = data_get($result, 'body.data.status');
+        $gatewayMessage = data_get($result, 'body.data.gateway_response')
+            ?? data_get($result, 'body.data.message');
 
         if ($status === 'success' && $donation->status !== Donation::STATUS_PAID) {
             $confirmer->markPaid($donation, $result['body']);
-        } elseif (in_array($status, ['failed', 'abandoned'], true)) {
-            $donation->update(['status' => Donation::STATUS_FAILED]);
+        } elseif (in_array($status, ['failed', 'abandoned', 'reversed'], true)) {
+            $donation->update([
+                'status' => Donation::STATUS_FAILED,
+                'gateway_response' => $gatewayMessage ?? $donation->gateway_response,
+            ]);
         }
 
         return response()->json([
