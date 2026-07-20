@@ -88,6 +88,13 @@
                     </div>
                 </label>
                 <label class="scope-option">
+                    <input type="radio" name="scope" value="group" {{ old('scope') === 'group' ? 'checked' : '' }}>
+                    <div>
+                        <div class="scope-title">Contact group</div>
+                        <div class="scope-count">Pick a saved group below</div>
+                    </div>
+                </label>
+                <label class="scope-option">
                     <input type="radio" name="scope" value="custom" {{ old('scope') === 'custom' ? 'checked' : '' }}>
                     <div>
                         <div class="scope-title">Custom numbers</div>
@@ -96,6 +103,19 @@
                 </label>
             </div>
             @error('scope')<div class="error">{{ $message }}</div>@enderror
+        </div>
+
+        <div class="form-group" id="groupPickerGroup" style="display: none;">
+            <label for="group_id" style="display:block; margin-bottom: 6px; font-size: 13px; font-weight: 500; color: var(--text-muted);">Contact group</label>
+            <select name="group_id" id="group_id">
+                <option value="">— Choose a group —</option>
+                @foreach ($groups ?? [] as $g)
+                    <option value="{{ $g->id }}" {{ (int) old('group_id') === $g->id ? 'selected' : '' }}>{{ $g->name }} ({{ $g->contacts_count }})</option>
+                @endforeach
+            </select>
+            @if (($groups ?? collect())->isEmpty())
+                <div style="font-size: 12px; color: var(--text-dim); margin-top: 6px;">No groups saved. <a href="{{ route('admin.contact-groups.index') }}" style="color: var(--red);">Create one</a> first.</div>
+            @endif
         </div>
 
         <div class="form-group" id="customPhonesGroup" style="display: none;">
@@ -213,9 +233,11 @@
         const countEl = document.getElementById('msgCount');
         const segEl = document.getElementById('segCount');
 
+        const groupPicker = document.getElementById('groupPickerGroup');
         function toggleCustom() {
             const val = document.querySelector('input[name=scope]:checked')?.value;
             customGroup.style.display = val === 'custom' ? '' : 'none';
+            if (groupPicker) groupPicker.style.display = val === 'group' ? '' : 'none';
         }
 
         function updateCount() {

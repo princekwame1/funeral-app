@@ -30,6 +30,11 @@ class Permissions
     // --- SMS: logs ---
     public const SMS_LOGS_VIEW = 'sms.logs.view';
 
+    // --- SMS: contacts & groups ---
+    public const CONTACTS_VIEW = 'contacts.view';
+    public const CONTACTS_MANAGE = 'contacts.manage';
+    public const CONTACTS_IMPORT = 'contacts.import';
+
     // --- Tenant admin (super only) ---
     public const BRANDING_VIEW = 'branding.view';
     public const BRANDING_EDIT = 'branding.edit';
@@ -57,6 +62,7 @@ class Permissions
     public const ROLES_VIEW = 'roles.view';
     public const ROLES_EDIT = 'roles.edit';
     public const PLANS_MANAGE = 'plans.manage';
+    public const WEBHOOKS_VIEW = 'webhooks.view';
 
     /**
      * Group permissions by module. Order matters for the roles table.
@@ -84,6 +90,11 @@ class Permissions
         ],
         'SMS · Logs' => [
             self::SMS_LOGS_VIEW,
+        ],
+        'SMS · Contacts & Groups' => [
+            self::CONTACTS_VIEW,
+            self::CONTACTS_MANAGE,
+            self::CONTACTS_IMPORT,
         ],
         'Branding' => [
             self::BRANDING_VIEW,
@@ -121,6 +132,9 @@ class Permissions
         'Platform · Plans' => [
             self::PLANS_MANAGE,
         ],
+        'Platform · Webhooks' => [
+            self::WEBHOOKS_VIEW,
+        ],
     ];
 
     /**
@@ -140,6 +154,9 @@ class Permissions
         self::SMS_POST_VIEW => 'Open the post-funeral messages page',
         self::SMS_POST_SEND => 'Send post-funeral SMS',
         self::SMS_LOGS_VIEW => 'View the SMS campaign log',
+        self::CONTACTS_VIEW => 'View saved contacts and contact groups',
+        self::CONTACTS_MANAGE => 'Add, edit, delete contacts and groups (syncs to TextTango)',
+        self::CONTACTS_IMPORT => 'Bulk import contacts from CSV or paste',
 
         self::BRANDING_VIEW => 'View branding settings',
         self::BRANDING_EDIT => 'Change tenant name, colors and images',
@@ -164,6 +181,7 @@ class Permissions
         self::ROLES_VIEW => 'View the roles & permissions reference',
         self::ROLES_EDIT => 'Change which permissions each non-super role has',
         self::PLANS_MANAGE => 'Configure subscription plans, limits and pricing',
+        self::WEBHOOKS_VIEW => 'View webhook endpoints and recent inbound events',
     ];
 
     /**
@@ -184,6 +202,9 @@ class Permissions
             self::SMS_POST_VIEW,
             self::SMS_POST_SEND,
             self::SMS_LOGS_VIEW,
+            self::CONTACTS_VIEW,
+            self::CONTACTS_MANAGE,
+            self::CONTACTS_IMPORT,
             self::TEAM_VIEW,
             self::TEAM_CREATE,
             self::TEAM_DELETE,

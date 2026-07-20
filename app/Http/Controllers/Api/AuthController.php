@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Support\Permissions;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -31,27 +32,38 @@ class AuthController extends Controller
 
         return response()->json([
             'token' => $token,
-            'user' => [
-                'id' => $user->id,
-                'name' => $user->name,
-                'email' => $user->email,
-                'role' => $user->role,
-            ],
+            'user' => $this->userPayload($user),
         ]);
     }
 
     public function me(Request $request): JsonResponse
     {
-        $user = $request->user();
+        return response()->json(['user' => $this->userPayload($request->user())]);
+    }
 
-        return response()->json([
-            'user' => [
-                'id' => $user->id,
-                'name' => $user->name,
-                'email' => $user->email,
-                'role' => $user->role,
-            ],
-        ]);
+    private function userPayload(User $user): array
+    {
+        $tenant = $user->tenant_id ? $user->tenant : null;
+        return [
+            'id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
+            'role' => $user->role,
+            'permissions' => Permissions::forRole($user->role),
+            'tenant' => $tenant ? [
+                'id' => $tenant->id,
+                'name' => $tenant->name,
+                'slug' => $tenant->slug,
+                'tagline' => $tenant->tagline,
+                'brand_primary' => $tenant->brand_primary,
+                'brand_accent' => $tenant->brand_accent,
+                'logo_url' => $tenant->logo_url,
+                'splash_image_url' => $tenant->splash_image_url,
+                'family_name' => $tenant->family_name,
+                'deceased_name' => $tenant->deceased_name,
+                'archived_at' => $tenant->archived_at?->toIso8601String(),
+            ] : null,
+        ];
     }
 
     public function logout(Request $request): JsonResponse

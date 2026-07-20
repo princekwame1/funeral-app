@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
+use App\Models\ContactGroup;
 use App\Models\Donation;
 use App\Models\SmsCampaign;
 use App\Services\SmsService;
@@ -11,7 +12,7 @@ use Illuminate\Support\Collection;
 
 class AdminSmsController extends Controller
 {
-    private const SCOPES = ['all', 'paid', 'pending', 'custom'];
+    private const SCOPES = ['all', 'paid', 'pending', 'custom', 'group'];
 
     private const KINDS = [
         'notifications' => [
@@ -97,8 +98,10 @@ class AdminSmsController extends Controller
         $heading = $config['heading'];
         $lead = $config['lead'];
 
+        $groups = ContactGroup::query()->withCount('contacts')->orderBy('name')->get();
+
         return view('admin.sms.compose', compact(
-            'counts', 'templates', 'campaigns', 'campaignTotals', 'heading', 'lead', 'kind'
+            'counts', 'templates', 'campaigns', 'campaignTotals', 'heading', 'lead', 'kind', 'groups'
         ));
     }
 
@@ -109,6 +112,7 @@ class AdminSmsController extends Controller
             'message' => 'required|string|min:1|max:1071',
             'campaign_name' => 'nullable|string|max:255',
             'custom_phones' => 'nullable|string|max:20000',
+            'group_id' => 'nullable|integer|exists:contact_groups,id',
             'kind' => 'nullable|in:notifications,invitations,post',
         ]);
 
@@ -120,9 +124,13 @@ class AdminSmsController extends Controller
         ];
         abort_unless($request->user()->can($sendPermMap[$kind]), 403, 'You cannot send from this SMS section.');
 
-        $recipients = $data['scope'] === 'custom'
-            ? $this->parseCustomPhones($data['custom_phones'] ?? '')
-            : $this->recipientsFor($data['scope']);
+        if ($data['scope'] === 'group' && ! empty($data['group_id'])) {
+            $recipients = ContactGroup::findOrFail($data['group_id'])->contacts()->pluck('phone');
+        } elseif ($data['scope'] === 'custom') {
+            $recipients = $this->parseCustomPhones($data['custom_phones'] ?? '');
+        } else {
+            $recipients = $this->recipientsFor($data['scope']);
+        }
 
         if ($recipients->isEmpty()) {
             return back()

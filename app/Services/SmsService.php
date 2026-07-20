@@ -116,6 +116,71 @@ class SmsService
         }
     }
 
+    // --- TextTango contact & group sync ------------------------------------
+
+    public function createContactGroup(string $name, ?string $description = null): array
+    {
+        if (! $this->configured()) return ['ok' => false, 'body' => null];
+        $r = $this->client()->post('/contact-groups', array_filter([
+            'name' => $name,
+            'description' => $description,
+        ]));
+        return ['ok' => $r->successful(), 'body' => $r->json() ?? []];
+    }
+
+    public function updateContactGroup(string $providerId, array $fields): array
+    {
+        if (! $this->configured()) return ['ok' => false, 'body' => null];
+        $r = $this->client()->patch('/contact-groups/' . rawurlencode($providerId), $fields);
+        return ['ok' => $r->successful(), 'body' => $r->json() ?? []];
+    }
+
+    public function deleteContactGroup(string $providerId): array
+    {
+        if (! $this->configured()) return ['ok' => false, 'body' => null];
+        $r = $this->client()->delete('/contact-groups/' . rawurlencode($providerId));
+        return ['ok' => $r->successful(), 'body' => $r->json() ?? []];
+    }
+
+    public function createContact(string $phone, ?string $firstName = null, ?string $lastName = null, ?string $email = null, array $groupProviderIds = []): array
+    {
+        if (! $this->configured()) return ['ok' => false, 'body' => null];
+        $r = $this->client()->post('/contacts', array_filter([
+            'phone' => $this->toE164($phone),
+            'first_name' => $firstName,
+            'last_name' => $lastName,
+            'email' => $email,
+            'contact_group_ids' => $groupProviderIds ?: null,
+        ], fn ($v) => $v !== null && $v !== ''));
+        return ['ok' => $r->successful(), 'body' => $r->json() ?? []];
+    }
+
+    public function bulkCreateContacts(array $rows): array
+    {
+        if (! $this->configured()) return ['ok' => false, 'body' => null];
+        $r = $this->client()->post('/contacts/bulk', ['contacts' => $rows]);
+        return ['ok' => $r->successful(), 'body' => $r->json() ?? []];
+    }
+
+    public function deleteContact(string $providerId): array
+    {
+        if (! $this->configured()) return ['ok' => false, 'body' => null];
+        $r = $this->client()->delete('/contacts/' . rawurlencode($providerId));
+        return ['ok' => $r->successful(), 'body' => $r->json() ?? []];
+    }
+
+    public function sendCampaignToGroups(array $groupProviderIds, string $message, ?string $campaignName = null): array
+    {
+        if (! $this->configured()) return ['ok' => false, 'body' => null];
+        $r = $this->client()->post('/campaigns', array_filter([
+            'from' => $this->senderId(),
+            'body' => $message,
+            'contact_group_ids' => $groupProviderIds,
+            'campaign_name' => $campaignName,
+        ], fn ($v) => $v !== null));
+        return ['ok' => $r->successful(), 'body' => $r->json() ?? []];
+    }
+
     private function client()
     {
         return Http::withToken((string) config('services.sms.api_key'))

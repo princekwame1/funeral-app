@@ -388,6 +388,8 @@
         elseif (request()->routeIs('admin.sms.invitations')) $pageTitle = 'Funeral Invitation';
         elseif (request()->routeIs('admin.sms.post')) $pageTitle = 'Post Notification';
         elseif (request()->routeIs('admin.sms.logs')) $pageTitle = 'SMS Logs';
+        elseif (request()->routeIs('admin.contacts.*')) $pageTitle = 'Contacts';
+        elseif (request()->routeIs('admin.contact-groups.*')) $pageTitle = 'Contact Groups';
         elseif (request()->routeIs('admin.team.*')) $pageTitle = 'Team';
         elseif (request()->routeIs('admin.events.*')) $pageTitle = 'Funeral';
         elseif (request()->routeIs('super.branding.*')) $pageTitle = 'Branding';
@@ -396,6 +398,7 @@
         elseif (request()->routeIs('super.users*')) $pageTitle = 'Users';
         elseif (request()->routeIs('super.roles.*')) $pageTitle = 'Roles & Permissions';
         elseif (request()->routeIs('super.plans.*')) $pageTitle = 'Plans';
+        elseif (request()->routeIs('super.webhooks.*')) $pageTitle = 'Webhooks';
         $user = auth()->user();
         $initials = collect(explode(' ', trim($user->name)))
             ->filter()
@@ -457,6 +460,7 @@
                 \App\Support\Permissions::SMS_INVITATIONS_VIEW,
                 \App\Support\Permissions::SMS_POST_VIEW,
                 \App\Support\Permissions::SMS_LOGS_VIEW,
+                \App\Support\Permissions::CONTACTS_VIEW,
             ])
                 <button type="button" class="nav-parent {{ $smsGroupOpen ? 'open active-parent' : '' }}" data-nav-toggle="smsGroup">
                     <span>SMS Notification</span>
@@ -475,6 +479,10 @@
                     @can(\App\Support\Permissions::SMS_LOGS_VIEW)
                         <a href="{{ route('admin.sms.logs') }}" class="{{ request()->routeIs('admin.sms.logs') ? 'active' : '' }}">SMS Logs</a>
                     @endcan
+                    @can(\App\Support\Permissions::CONTACTS_VIEW)
+                        <a href="{{ route('admin.contacts.index') }}" class="{{ request()->routeIs('admin.contacts.*') ? 'active' : '' }}">Contacts</a>
+                        <a href="{{ route('admin.contact-groups.index') }}" class="{{ request()->routeIs('admin.contact-groups.*') ? 'active' : '' }}">Contact Groups</a>
+                    @endcan
                 </div>
             @endcanany
 
@@ -492,6 +500,7 @@
                 \App\Support\Permissions::USERS_VIEW,
                 \App\Support\Permissions::ROLES_VIEW,
                 \App\Support\Permissions::PLANS_MANAGE,
+                \App\Support\Permissions::WEBHOOKS_VIEW,
             ])
                 <div class="nav-group-label">Super Admin</div>
                 @can(\App\Support\Permissions::PLATFORM_OVERVIEW)
@@ -511,6 +520,9 @@
                 @endcan
                 @can(\App\Support\Permissions::PLANS_MANAGE)
                     <a href="{{ route('super.plans.index') }}" class="{{ request()->routeIs('super.plans.*') ? 'active' : '' }}">Plans</a>
+                @endcan
+                @can(\App\Support\Permissions::WEBHOOKS_VIEW)
+                    <a href="{{ route('super.webhooks.index') }}" class="{{ request()->routeIs('super.webhooks.*') ? 'active' : '' }}">Webhooks</a>
                 @endcan
                 @if (session('super.active_tenant'))
                     <form method="POST" action="{{ route('super.tenants.clear-switch') }}" style="margin-top: 8px;">

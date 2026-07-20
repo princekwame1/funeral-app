@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\Web\AdminBrandingController;
+use App\Http\Controllers\Web\AdminContactController;
+use App\Http\Controllers\Web\AdminContactGroupController;
 use App\Http\Controllers\Web\AdminDashboardController;
 use App\Http\Controllers\Web\AdminDonationController;
 use App\Http\Controllers\Web\AdminEventController;
@@ -11,6 +13,7 @@ use App\Http\Controllers\Web\LoginController;
 use App\Http\Controllers\Web\SuperPlansController;
 use App\Http\Controllers\Web\SuperRolesController;
 use App\Http\Controllers\Web\SuperTenantController;
+use App\Http\Controllers\Web\SuperWebhookController;
 use App\Support\Permissions as P;
 use Illuminate\Support\Facades\Route;
 
@@ -40,6 +43,17 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::get('/sms/invitations', fn () => app(AdminSmsController::class)->show('invitations'))->middleware('can:' . P::SMS_INVITATIONS_VIEW)->name('sms.invitations');
     Route::get('/sms/post', fn () => app(AdminSmsController::class)->show('post'))->middleware('can:' . P::SMS_POST_VIEW)->name('sms.post');
     Route::get('/sms/logs', [AdminSmsController::class, 'logs'])->middleware('can:' . P::SMS_LOGS_VIEW)->name('sms.logs');
+
+    Route::get('/contacts', [AdminContactController::class, 'index'])->middleware('can:' . P::CONTACTS_VIEW)->name('contacts.index');
+    Route::post('/contacts', [AdminContactController::class, 'store'])->middleware(['can:' . P::CONTACTS_MANAGE, 'writable'])->name('contacts.store');
+    Route::post('/contacts/import', [AdminContactController::class, 'import'])->middleware(['can:' . P::CONTACTS_IMPORT, 'writable'])->name('contacts.import');
+    Route::post('/contacts/{contact}', [AdminContactController::class, 'update'])->middleware(['can:' . P::CONTACTS_MANAGE, 'writable'])->name('contacts.update');
+    Route::post('/contacts/{contact}/delete', [AdminContactController::class, 'destroy'])->middleware(['can:' . P::CONTACTS_MANAGE, 'writable'])->name('contacts.destroy');
+
+    Route::get('/contact-groups', [AdminContactGroupController::class, 'index'])->middleware('can:' . P::CONTACTS_VIEW)->name('contact-groups.index');
+    Route::post('/contact-groups', [AdminContactGroupController::class, 'store'])->middleware(['can:' . P::CONTACTS_MANAGE, 'writable'])->name('contact-groups.store');
+    Route::post('/contact-groups/{group}', [AdminContactGroupController::class, 'update'])->middleware(['can:' . P::CONTACTS_MANAGE, 'writable'])->name('contact-groups.update');
+    Route::post('/contact-groups/{group}/delete', [AdminContactGroupController::class, 'destroy'])->middleware(['can:' . P::CONTACTS_MANAGE, 'writable'])->name('contact-groups.destroy');
     Route::post('/sms', [AdminSmsController::class, 'send'])->middleware('writable')->name('sms.send'); // permission checked in controller by scope
 
     Route::get('/team', [AdminTeamController::class, 'index'])->middleware('can:' . P::TEAM_VIEW)->name('team.index');
@@ -83,4 +97,6 @@ Route::middleware(['auth', 'super'])->prefix('super')->name('super.')->group(fun
     Route::post('/plans', [SuperPlansController::class, 'store'])->middleware('can:' . P::PLANS_MANAGE)->name('plans.store');
     Route::post('/plans/{plan}', [SuperPlansController::class, 'update'])->middleware('can:' . P::PLANS_MANAGE)->name('plans.update');
     Route::post('/plans/{plan}/delete', [SuperPlansController::class, 'destroy'])->middleware('can:' . P::PLANS_MANAGE)->name('plans.destroy');
+
+    Route::get('/webhooks', [SuperWebhookController::class, 'index'])->middleware('can:' . P::WEBHOOKS_VIEW)->name('webhooks.index');
 });
