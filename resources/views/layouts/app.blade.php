@@ -569,7 +569,7 @@
                     <div class="name">{{ $user->name }}</div>
                     <div class="email">{{ $user->email }}</div>
                 </div>
-                <a href="{{ route('account.password.edit') }}">Change password</a>
+                <a href="{{ route('admin.account.password.edit') }}">Change password</a>
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
                     <button type="submit" class="logout-btn">Sign out</button>

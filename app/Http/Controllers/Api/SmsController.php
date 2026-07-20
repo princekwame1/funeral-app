@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\ContactGroup;
 use App\Models\SmsCampaign;
+use App\Models\SmsTemplate;
 use App\Services\SmsService;
 use App\Support\CurrentTenant;
 use App\Support\Permissions;
@@ -14,6 +15,19 @@ use Illuminate\Http\Request;
 
 class SmsController extends Controller
 {
+    /**
+     * List reusable SMS templates for the current tenant.
+     * Optional filter: ?kind=thankyou|notifications|invitations|post
+     */
+    public function templates(Request $request): JsonResponse
+    {
+        $q = SmsTemplate::query()->orderBy('kind')->orderBy('sort_order')->orderBy('id');
+        if ($kind = $request->query('kind')) {
+            $q->where('kind', $kind);
+        }
+        return response()->json(['templates' => $q->get()]);
+    }
+
     public function send(Request $request, SmsService $sms): JsonResponse
     {
         abort_unless(

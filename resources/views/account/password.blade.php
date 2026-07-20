@@ -7,7 +7,7 @@
 </p>
 
 <div class="card" style="max-width: 560px;">
-    <form method="POST" action="{{ route('account.password.update') }}">
+    <form method="POST" action="{{ route('admin.account.password.update') }}">
         @csrf
         <div class="form-group">
             <label class="field-label" for="current_password">Current password</label>

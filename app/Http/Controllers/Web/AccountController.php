@@ -29,7 +29,7 @@ class AccountController extends Controller
 
         $user->update(['password' => Hash::make($data['password'])]);
 
-        return redirect()->route('account.password.edit')
+        return redirect()->route('admin.account.password.edit')
             ->with('super_flash', ['ok' => true, 'message' => 'Password updated.']);
     }
 }
