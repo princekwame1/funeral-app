@@ -151,7 +151,14 @@
             padding: 24px;
             position: relative;
             overflow: hidden;
-            background: var(--black);
+            /* Layered background: dark tint on top, then tenant's uploaded image if any, then the default phone_bg.png, then solid black at the bottom. */
+            background:
+                linear-gradient(to bottom, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0.75) 55%, rgba(0,0,0,0.9) 100%),
+                @if ($brandBackground)
+                url('{{ $brandBackground }}') center bottom / cover no-repeat,
+                @endif
+                url('{{ asset('images/phone_bg.png') }}') center bottom / cover no-repeat,
+                var(--black);
         }
         .login-wrap::before {
             content: '';
