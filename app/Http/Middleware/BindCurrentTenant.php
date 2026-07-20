@@ -3,9 +3,11 @@
 namespace App\Http\Middleware;
 
 use App\Models\Tenant;
+use App\Models\User;
 use App\Support\CurrentTenant;
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
 class BindCurrentTenant
@@ -20,16 +22,19 @@ class BindCurrentTenant
         $tenant = $this->fromSubdomain($request);
 
         if (! $tenant) {
-            $user = $request->user();
+            $user = $this->resolveUser($request);
 
             if ($user) {
                 if ($user->isSuper()) {
-                    $picked = $request->session()->get('super.active_tenant');
-                    if ($picked && $t = Tenant::find($picked)) {
-                        $tenant = $t;
+                    // Sessions only exist for the web guard; skip for token API requests.
+                    if ($request->hasSession()) {
+                        $picked = $request->session()->get('super.active_tenant');
+                        if ($picked && $t = Tenant::find($picked)) {
+                            $tenant = $t;
+                        }
                     }
                 } elseif ($user->tenant_id) {
-                    $tenant = $user->tenant;
+                    $tenant = Tenant::find($user->tenant_id);
                 }
             }
         }
@@ -39,6 +44,29 @@ class BindCurrentTenant
         }
 
         return $next($request);
+    }
+
+    /**
+     * Try every guard in turn so this middleware works for both web (session)
+     * and API (Sanctum bearer token) authenticated requests. The `auth:sanctum`
+     * route middleware runs AFTER group middleware, so we resolve manually here.
+     */
+    private function resolveUser(Request $request): ?User
+    {
+        // Fast path — default guard (session on web).
+        $user = $request->user();
+        if ($user) return $user;
+
+        // Sanctum's personal-access-token guard, populated by Bearer header.
+        foreach (['sanctum', 'api'] as $guard) {
+            try {
+                $u = Auth::guard($guard)->user();
+                if ($u) return $u;
+            } catch (\Throwable $e) {
+                // Guard may not be configured — ignore.
+            }
+        }
+        return null;
     }
 
     private function fromSubdomain(Request $request): ?Tenant

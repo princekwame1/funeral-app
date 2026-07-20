@@ -17,6 +17,7 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->web(append: [BindCurrentTenant::class]);
+        $middleware->api(append: [BindCurrentTenant::class]);
         $middleware->alias([
             'admin' => EnsureAdmin::class,
             'super' => EnsureSuper::class,
