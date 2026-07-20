@@ -6,8 +6,11 @@
         <h2 style="margin: 0 0 4px;">Contacts</h2>
         <p style="color: var(--text-muted); margin: 0; font-size: 14px;">Saved recipients for bulk SMS. New contacts are pushed to TextTango automatically.</p>
     </div>
-    <div style="display: flex; gap: 8px;">
+    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
         <a href="{{ route('admin.contact-groups.index') }}" class="btn-outline">Manage groups</a>
+        @can(\App\Support\Permissions::CONTACTS_IMPORT)
+            <button type="button" class="btn-outline" onclick="document.getElementById('importCard').classList.toggle('open'); document.getElementById('importCard').scrollIntoView({behavior:'smooth', block:'start'});" style="width: auto; padding: 10px 20px;">&#8681; Import Excel / CSV</button>
+        @endcan
         @can(\App\Support\Permissions::CONTACTS_MANAGE)
             <button type="button" class="btn-primary" onclick="document.getElementById('addContactCard').classList.toggle('open')" style="width: auto; padding: 10px 20px;">+ Add contact</button>
         @endcan
