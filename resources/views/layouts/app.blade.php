@@ -129,8 +129,10 @@
         .badge-failed { background: rgba(var(--red-rgb), 0.2); color: var(--red); border: 1px solid rgba(var(--red-rgb), 0.5); }
         .badge-method-online { background: rgba(66, 165, 245, 0.15); color: #64b5f6; border: 1px solid rgba(100, 181, 246, 0.4); }
         .badge-method-offline { background: rgba(255,255,255,0.06); color: var(--text-muted); border: 1px solid var(--border); }
-        .filters { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
-        .filters input, .filters select { padding: 8px 12px; border: 1px solid var(--border); background: var(--surface-2); color: var(--text); border-radius: 6px; font-size: 14px; }
+        .filters { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; align-items: center; }
+        .filters input, .filters select { padding: 8px 12px; border: 1px solid var(--border); background: var(--surface-2); color: var(--text); border-radius: 6px; font-size: 14px; width: auto; min-width: 180px; }
+        .filters input[type=text], .filters input[type=search] { flex: 1 1 240px; min-width: 240px; }
+        .filters select { padding-right: 34px; background-position: right 12px center; background-size: 10px; }
         .filters input::placeholder { color: var(--text-dim); }
         .filters input:focus, .filters select:focus { outline: none; border-color: var(--red); box-shadow: 0 0 0 2px rgba(var(--red-rgb), 0.25); }
         .filters button { padding: 8px 16px; background: var(--red); color: #fff; border: none; border-radius: 6px; cursor: pointer; font-weight: 500; transition: background 0.15s; }

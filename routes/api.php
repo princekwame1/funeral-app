@@ -30,4 +30,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/events', [\App\Http\Controllers\Api\EventController::class, 'index']);
     Route::post('/events', [\App\Http\Controllers\Api\EventController::class, 'store']);
     Route::post('/events/{event}/delete', [\App\Http\Controllers\Api\EventController::class, 'destroy']);
+
+    Route::post('/sms/send', [\App\Http\Controllers\Api\SmsController::class, 'send']);
 });

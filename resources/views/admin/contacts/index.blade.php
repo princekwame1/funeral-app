@@ -33,10 +33,6 @@
                 <label class="field-label">Last name</label>
                 <input type="text" name="last_name" value="{{ old('last_name') }}" maxlength="100">
             </div>
-            <div class="form-group">
-                <label class="field-label">Email <span style="color: var(--text-dim); font-weight: 400;">(optional)</span></label>
-                <input type="email" name="email" value="{{ old('email') }}" maxlength="150">
-            </div>
         </div>
         <div class="form-group" style="margin-top: 8px;">
             <label class="field-label">Add to groups</label>
@@ -54,12 +50,20 @@
 
 @can(\App\Support\Permissions::CONTACTS_IMPORT)
 <div id="importCard" class="card collapsible" style="margin-bottom: 16px;">
-    <h3 style="margin: 0 0 6px; font-size: 15px;">Import from CSV / paste</h3>
-    <p style="color: var(--text-muted); margin: 0 0 12px; font-size: 13px;">One contact per line. Format: <code style="background: var(--surface-2); padding: 1px 6px; border-radius: 4px;">phone,first,last,email</code>. Only <strong>phone</strong> is required.</p>
-    <form method="POST" action="{{ route('admin.contacts.import') }}">
+    <h3 style="margin: 0 0 6px; font-size: 15px;">Import contacts</h3>
+    <p style="color: var(--text-muted); margin: 0 0 12px; font-size: 13px;">Upload an <strong>Excel</strong> (.xlsx / .xls) or <strong>CSV</strong> file, or paste rows below. Two columns only: <code style="background: var(--surface-2); padding: 1px 6px; border-radius: 4px;">name, phone</code> (order doesn't matter — the phone column is auto-detected). Header row is allowed and skipped.</p>
+    <form method="POST" action="{{ route('admin.contacts.import') }}" enctype="multipart/form-data">
         @csrf
         <div class="form-group">
-            <textarea name="raw" rows="6" placeholder="0244123456,Ama,Boateng,ama@example.com&#10;0201234567,John,Mensah&#10;0555555555" required></textarea>
+            <label class="field-label">Excel / CSV file</label>
+            <input type="file" name="file" accept=".xlsx,.xls,.csv,.txt" class="file-input">
+            @error('file')<div class="error">{{ $message }}</div>@enderror
+        </div>
+        <div class="or-divider"><span>or</span></div>
+        <div class="form-group">
+            <label class="field-label">Paste rows</label>
+            <textarea name="raw" rows="6" placeholder="Ama Boateng,0244123456&#10;John Mensah,0201234567&#10;Kwame Nkrumah,0555555555"></textarea>
+            @error('raw')<div class="error">{{ $message }}</div>@enderror
         </div>
         <div class="form-group">
             <label class="field-label">Assign all imported contacts to a group <span style="color: var(--text-dim); font-weight: 400;">(optional)</span></label>
@@ -95,7 +99,6 @@
                 <tr>
                     <th>Name</th>
                     <th>Phone</th>
-                    <th>Email</th>
                     <th>Groups</th>
                     <th>Synced</th>
                     <th></th>
@@ -106,7 +109,6 @@
                     <tr>
                         <td style="font-weight: 500;">{{ $c->displayName() }}</td>
                         <td style="font-family: monospace;">{{ $c->phone }}</td>
-                        <td>{{ $c->email ?? '—' }}</td>
                         <td>
                             @foreach ($c->groups as $g)
                                 <span class="badge badge-method-offline">{{ $g->name }}</span>
