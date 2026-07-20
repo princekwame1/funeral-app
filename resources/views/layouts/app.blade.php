@@ -151,13 +151,13 @@
             padding: 24px;
             position: relative;
             overflow: hidden;
-            /* Layered background: dark tint on top, then tenant's uploaded image if any, then the default phone_bg.png, then solid black at the bottom. */
+            /* Layered background: dark tint on top, then tenant's uploaded image if any, then the default phone_bg.png, then solid black behind everything. Image aligned dead-center. */
             background:
                 linear-gradient(to bottom, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0.75) 55%, rgba(0,0,0,0.9) 100%),
                 @if ($brandBackground)
-                url('{{ $brandBackground }}') center bottom / cover no-repeat,
+                url('{{ $brandBackground }}') center center / cover no-repeat,
                 @endif
-                url('{{ asset('images/phone_bg.png') }}') center bottom / cover no-repeat,
+                url('{{ asset('images/phone_bg.png') }}') center center / cover no-repeat,
                 var(--black);
         }
         .login-wrap::before {
@@ -397,6 +397,7 @@
         elseif (request()->routeIs('admin.sms.invitations')) $pageTitle = 'Funeral Invitation';
         elseif (request()->routeIs('admin.sms.post')) $pageTitle = 'Post Notification';
         elseif (request()->routeIs('admin.sms.logs')) $pageTitle = 'SMS Logs';
+        elseif (request()->routeIs('admin.sms-templates.*')) $pageTitle = 'Message Templates';
         elseif (request()->routeIs('admin.contacts.*')) $pageTitle = 'Contacts';
         elseif (request()->routeIs('admin.contact-groups.*')) $pageTitle = 'Contact Groups';
         elseif (request()->routeIs('admin.team.*')) $pageTitle = 'Team';
@@ -408,6 +409,7 @@
         elseif (request()->routeIs('super.roles.*')) $pageTitle = 'Roles & Permissions';
         elseif (request()->routeIs('super.plans.*')) $pageTitle = 'Plans';
         elseif (request()->routeIs('super.webhooks.*')) $pageTitle = 'Webhooks';
+        elseif (request()->routeIs('account.password.*')) $pageTitle = 'Change Password';
         $user = auth()->user();
         $initials = collect(explode(' ', trim($user->name)))
             ->filter()
@@ -469,6 +471,7 @@
                 \App\Support\Permissions::SMS_INVITATIONS_VIEW,
                 \App\Support\Permissions::SMS_POST_VIEW,
                 \App\Support\Permissions::SMS_LOGS_VIEW,
+                \App\Support\Permissions::SMS_TEMPLATES_MANAGE,
                 \App\Support\Permissions::CONTACTS_VIEW,
             ])
                 <button type="button" class="nav-parent {{ $smsGroupOpen ? 'open active-parent' : '' }}" data-nav-toggle="smsGroup">
@@ -487,6 +490,9 @@
                     @endcan
                     @can(\App\Support\Permissions::SMS_LOGS_VIEW)
                         <a href="{{ route('admin.sms.logs') }}" class="{{ request()->routeIs('admin.sms.logs') ? 'active' : '' }}">SMS Logs</a>
+                    @endcan
+                    @can(\App\Support\Permissions::SMS_TEMPLATES_MANAGE)
+                        <a href="{{ route('admin.sms-templates.index') }}" class="{{ request()->routeIs('admin.sms-templates.*') ? 'active' : '' }}">Message Templates</a>
                     @endcan
                     @can(\App\Support\Permissions::CONTACTS_VIEW)
                         <a href="{{ route('admin.contacts.index') }}" class="{{ request()->routeIs('admin.contacts.*') ? 'active' : '' }}">Contacts</a>
@@ -563,6 +569,7 @@
                     <div class="name">{{ $user->name }}</div>
                     <div class="email">{{ $user->email }}</div>
                 </div>
+                <a href="{{ route('account.password.edit') }}">Change password</a>
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
                     <button type="submit" class="logout-btn">Sign out</button>

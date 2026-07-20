@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Web\AccountController;
 use App\Http\Controllers\Web\AdminBrandingController;
 use App\Http\Controllers\Web\AdminContactController;
 use App\Http\Controllers\Web\AdminContactGroupController;
@@ -7,6 +8,7 @@ use App\Http\Controllers\Web\AdminDashboardController;
 use App\Http\Controllers\Web\AdminDonationController;
 use App\Http\Controllers\Web\AdminEventController;
 use App\Http\Controllers\Web\AdminSmsController;
+use App\Http\Controllers\Web\AdminSmsTemplateController;
 use App\Http\Controllers\Web\AdminTeamController;
 use App\Http\Controllers\Web\ImpersonationController;
 use App\Http\Controllers\Web\LoginController;
@@ -44,6 +46,11 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::get('/sms/post', fn () => app(AdminSmsController::class)->show('post'))->middleware('can:' . P::SMS_POST_VIEW)->name('sms.post');
     Route::get('/sms/logs', [AdminSmsController::class, 'logs'])->middleware('can:' . P::SMS_LOGS_VIEW)->name('sms.logs');
 
+    Route::get('/sms-templates', [AdminSmsTemplateController::class, 'index'])->middleware('can:' . P::SMS_TEMPLATES_MANAGE)->name('sms-templates.index');
+    Route::post('/sms-templates', [AdminSmsTemplateController::class, 'store'])->middleware(['can:' . P::SMS_TEMPLATES_MANAGE, 'writable'])->name('sms-templates.store');
+    Route::post('/sms-templates/{template}', [AdminSmsTemplateController::class, 'update'])->middleware(['can:' . P::SMS_TEMPLATES_MANAGE, 'writable'])->name('sms-templates.update');
+    Route::post('/sms-templates/{template}/delete', [AdminSmsTemplateController::class, 'destroy'])->middleware(['can:' . P::SMS_TEMPLATES_MANAGE, 'writable'])->name('sms-templates.destroy');
+
     Route::get('/contacts', [AdminContactController::class, 'index'])->middleware('can:' . P::CONTACTS_VIEW)->name('contacts.index');
     Route::post('/contacts', [AdminContactController::class, 'store'])->middleware(['can:' . P::CONTACTS_MANAGE, 'writable'])->name('contacts.store');
     Route::post('/contacts/import', [AdminContactController::class, 'import'])->middleware(['can:' . P::CONTACTS_IMPORT, 'writable'])->name('contacts.import');
@@ -59,6 +66,10 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::get('/team', [AdminTeamController::class, 'index'])->middleware('can:' . P::TEAM_VIEW)->name('team.index');
     Route::post('/team', [AdminTeamController::class, 'store'])->middleware('can:' . P::TEAM_CREATE)->name('team.store');
     Route::post('/team/{user_id}/delete', [AdminTeamController::class, 'destroy'])->middleware('can:' . P::TEAM_DELETE)->name('team.destroy');
+    Route::post('/team/{user_id}/password', [AdminTeamController::class, 'resetPassword'])->middleware(['can:' . P::TEAM_RESET_PASSWORD, 'writable'])->name('team.reset-password');
+
+    Route::get('/account/password', [AccountController::class, 'editPassword'])->name('account.password.edit');
+    Route::post('/account/password', [AccountController::class, 'updatePassword'])->name('account.password.update');
 
     Route::get('/events', [AdminEventController::class, 'index'])->middleware('can:' . P::EVENTS_VIEW)->name('events.index');
     Route::post('/events/funeral-info', [AdminEventController::class, 'updateFuneralInfo'])->middleware('can:' . P::EVENTS_MANAGE)->name('events.funeral-info');
@@ -84,6 +95,7 @@ Route::middleware(['auth', 'super'])->prefix('super')->name('super.')->group(fun
     Route::get('/users', [SuperTenantController::class, 'users'])->middleware('can:' . P::USERS_VIEW)->name('users');
     Route::post('/users', [SuperTenantController::class, 'storeUser'])->middleware('can:' . P::USERS_CREATE)->name('users.store');
     Route::post('/users/{user}/delete', [SuperTenantController::class, 'deleteUser'])->middleware('can:' . P::USERS_DELETE)->name('users.delete');
+    Route::post('/users/{user}/password', [SuperTenantController::class, 'resetUserPassword'])->middleware('can:' . P::USERS_CREATE)->name('users.reset-password');
     Route::post('/users/{user_id}/impersonate', [ImpersonationController::class, 'start'])->middleware('can:' . P::USERS_IMPERSONATE)->name('users.impersonate');
 
     Route::get('/branding', [AdminBrandingController::class, 'edit'])->middleware('can:' . P::BRANDING_VIEW)->name('branding.edit');

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\ContactGroup;
 use App\Models\Donation;
 use App\Models\SmsCampaign;
+use App\Models\SmsTemplate;
 use App\Services\SmsService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -94,7 +95,20 @@ class AdminSmsController extends Controller
             'thank_you_sent' => Donation::where('sms_sent', true)->count(),
         ];
 
-        $templates = $config['templates'];
+        // Load templates for this kind from the DB (tenant-scoped). If the tenant
+        // has no rows yet (e.g. was created before the sms_templates migration
+        // ran), fall back to the hardcoded KINDS map as a safety net.
+        $dbTemplates = SmsTemplate::where('kind', $kind)
+            ->orderBy('sort_order')->orderBy('id')
+            ->get();
+
+        if ($dbTemplates->isNotEmpty()) {
+            $templates = $dbTemplates
+                ->mapWithKeys(fn ($t) => [$t->slug => ['label' => $t->label, 'body' => $t->body]])
+                ->all();
+        } else {
+            $templates = $config['templates'];
+        }
         $heading = $config['heading'];
         $lead = $config['lead'];
 

@@ -60,12 +60,55 @@ class DonationConfirmer
         $reference = $donation->paystack_reference ?? 'OFF-' . $donation->id;
         $firstName = strtok(trim($donation->donor_name), ' ') ?: $donation->donor_name;
 
-        return sprintf(
-            "Dear %s, thank you for your kind contribution of %s %s to the family. May God bless you. Ref: %s",
-            $firstName,
-            $donation->currency,
-            $amountMajor,
-            $reference
-        );
+        $tenant = $donation->tenant_id
+            ? \App\Models\Tenant::find($donation->tenant_id)
+            : null;
+
+        // Prefer the tenant's editable thank-you template (sms_templates table).
+        $body = self::defaultTemplate();
+        if ($tenant) {
+            $template = \App\Models\SmsTemplate::withoutGlobalScopes()
+                ->where('tenant_id', $tenant->id)
+                ->where('kind', \App\Models\SmsTemplate::KIND_THANKYOU)
+                ->where('is_default', true)
+                ->first();
+            if ($template) {
+                $body = $template->body;
+            } elseif ($tenant->thankyou_template) {
+                // Legacy column fallback for tenants seeded before the sms_templates table.
+                $body = $tenant->thankyou_template;
+            }
+        }
+
+        return strtr($body, [
+            '[DONOR]' => $firstName,
+            '[NAME]' => $firstName,
+            '[FULL_NAME]' => $donation->donor_name,
+            '[AMOUNT]' => "{$donation->currency} {$amountMajor}",
+            '[CURRENCY]' => $donation->currency,
+            '[REFERENCE]' => $reference,
+            '[FAMILY]' => $tenant?->family_name ?? '',
+            '[DECEASED]' => $tenant?->deceased_name ?? '',
+            '[TENANT]' => $tenant?->name ?? '',
+        ]);
+    }
+
+    public static function defaultTemplate(): string
+    {
+        return 'Dear [DONOR], thank you for your kind contribution of [AMOUNT] to the family. May God bless you.';
+    }
+
+    public static function availableTokens(): array
+    {
+        return [
+            '[DONOR]' => "Donor's first name",
+            '[FULL_NAME]' => "Donor's full name",
+            '[AMOUNT]' => 'Amount with currency (e.g. GHS 50.00)',
+            '[CURRENCY]' => 'Currency code (e.g. GHS)',
+            '[REFERENCE]' => 'Payment / receipt reference',
+            '[FAMILY]' => 'Family name (from Funeral page)',
+            '[DECEASED]' => "Deceased's name (from Funeral page)",
+            '[TENANT]' => 'Tenant name',
+        ];
     }
 }

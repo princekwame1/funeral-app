@@ -131,6 +131,20 @@ class SuperTenantController extends Controller
             ->with('super_flash', ['ok' => true, 'message' => 'User created.']);
     }
 
+    public function resetUserPassword(Request $request, User $user)
+    {
+        $data = $request->validate([
+            'password' => ['required', 'string', 'min:8'],
+        ]);
+
+        $user->update(['password' => Hash::make($data['password'])]);
+
+        return back()->with('super_flash', [
+            'ok' => true,
+            'message' => "Password reset for {$user->name}.",
+        ]);
+    }
+
     public function deleteUser(User $user)
     {
         if ($user->id === auth()->id()) {

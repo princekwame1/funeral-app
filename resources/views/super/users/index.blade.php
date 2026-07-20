@@ -90,6 +90,7 @@
                                         </form>
                                     @endif
                                 @endcan
+                                <button type="button" class="btn-verify" onclick="document.getElementById('super-pwd-{{ $u->id }}').classList.toggle('open')">Reset password</button>
                                 <form method="POST" action="{{ route('super.users.delete', $u) }}" style="margin: 0;"
                                       data-confirm="Delete user {{ $u->email }}? This cannot be undone."
                                       data-confirm-title="Delete user?"
@@ -105,6 +106,24 @@
                         @endif
                     </td>
                 </tr>
+                @if ($u->id !== auth()->id())
+                    <tr id="super-pwd-{{ $u->id }}" class="pwd-row">
+                        <td colspan="5" style="background: var(--surface-2); padding: 12px 14px;">
+                            <form method="POST" action="{{ route('super.users.reset-password', $u) }}"
+                                  style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin: 0;"
+                                  data-confirm="Reset {{ $u->name }}'s password to what you typed?"
+                                  data-confirm-title="Reset password?"
+                                  data-confirm-icon="warning"
+                                  data-confirm-text="Reset">
+                                @csrf
+                                <label style="font-size: 12px; color: var(--text-muted); min-width: 130px;">New password for<br><strong style="color: var(--text);">{{ $u->email }}</strong></label>
+                                <input type="text" name="password" required minlength="8" placeholder="min 8 characters" style="flex: 1 1 260px; min-width: 260px; padding: 8px 12px; border: 1px solid var(--border); background: var(--surface); color: var(--text); border-radius: 6px; font-family: monospace;">
+                                <button type="submit" class="btn-primary" style="width: auto; padding: 8px 18px;">Save</button>
+                                <button type="button" class="btn-verify" onclick="document.getElementById('super-pwd-{{ $u->id }}').classList.remove('open')">Cancel</button>
+                            </form>
+                        </td>
+                    </tr>
+                @endif
             @endforeach
         </tbody>
     </table>
@@ -117,5 +136,7 @@
     .card input, .card select { width: 100%; padding: 11px 14px; border: 1px solid var(--border); background: var(--surface-2); color: var(--text); border-radius: 6px; font-size: 14px; font-family: inherit; }
     .card input:focus, .card select:focus { outline: none; border-color: var(--red); box-shadow: 0 0 0 2px rgba(var(--red-rgb), 0.25); }
     .btn-verify { background: transparent; border: 1px solid var(--border); color: var(--text-muted); padding: 5px 12px; border-radius: 999px; font-size: 12px; cursor: pointer; }
+    .pwd-row { display: none; }
+    .pwd-row.open { display: table-row; }
 </style>
 @endsection

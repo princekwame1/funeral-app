@@ -25,6 +25,7 @@ class Tenant extends Model
         'background_image_url',
         'favicon_url',
         'sms_sender_id',
+        'thankyou_template',
         'paystack_secret',
         'paystack_public',
         'is_active',

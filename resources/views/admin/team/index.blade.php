@@ -83,20 +83,45 @@
                             @elseif ($u->isSuper())
                                 <span style="color: var(--text-dim); font-size: 12px;">(super)</span>
                             @else
-                                @can(\App\Support\Permissions::TEAM_DELETE)
-                                    <form method="POST" action="{{ route('admin.team.destroy', $u->id) }}" style="margin: 0;"
-                                          data-confirm="Remove {{ $u->name }} from the team? They will lose access immediately."
-                                          data-confirm-title="Remove team member?"
-                                          data-confirm-icon="warning"
-                                          data-confirm-text="Remove"
-                                          data-confirm-danger="1">
-                                        @csrf
-                                        <button type="submit" class="btn-verify" style="color: var(--red);">Remove</button>
-                                    </form>
-                                @endcan
+                                <div style="display: flex; gap: 4px; flex-wrap: wrap;">
+                                    @can(\App\Support\Permissions::TEAM_RESET_PASSWORD)
+                                        <button type="button" class="btn-verify" onclick="document.getElementById('pwd-{{ $u->id }}').classList.toggle('open')">Reset password</button>
+                                    @endcan
+                                    @can(\App\Support\Permissions::TEAM_DELETE)
+                                        <form method="POST" action="{{ route('admin.team.destroy', $u->id) }}" style="margin: 0;"
+                                              data-confirm="Remove {{ $u->name }} from the team? They will lose access immediately."
+                                              data-confirm-title="Remove team member?"
+                                              data-confirm-icon="warning"
+                                              data-confirm-text="Remove"
+                                              data-confirm-danger="1">
+                                            @csrf
+                                            <button type="submit" class="btn-verify" style="color: var(--red);">Remove</button>
+                                        </form>
+                                    @endcan
+                                </div>
                             @endif
                         </td>
                     </tr>
+                    @can(\App\Support\Permissions::TEAM_RESET_PASSWORD)
+                        @if ($u->id !== auth()->id() && ! $u->isSuper())
+                            <tr id="pwd-{{ $u->id }}" class="pwd-row">
+                                <td colspan="5" style="background: var(--surface-2); padding: 12px 14px;">
+                                    <form method="POST" action="{{ route('admin.team.reset-password', $u->id) }}"
+                                          style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin: 0;"
+                                          data-confirm="Reset {{ $u->name }}'s password to what you typed? Share it with them privately."
+                                          data-confirm-title="Reset password?"
+                                          data-confirm-icon="warning"
+                                          data-confirm-text="Reset">
+                                        @csrf
+                                        <label style="font-size: 12px; color: var(--text-muted); min-width: 110px;">New password for<br><strong style="color: var(--text);">{{ $u->name }}</strong></label>
+                                        <input type="text" name="password" required minlength="8" maxlength="120" placeholder="min 8 characters" style="flex: 1 1 260px; min-width: 260px; padding: 8px 12px; border: 1px solid var(--border); background: var(--surface); color: var(--text); border-radius: 6px; font-family: monospace;">
+                                        <button type="submit" class="btn-primary" style="width: auto; padding: 8px 18px;">Save</button>
+                                        <button type="button" class="btn-verify" onclick="document.getElementById('pwd-{{ $u->id }}').classList.remove('open')">Cancel</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        @endif
+                    @endcan
                 @endforeach
             </tbody>
         </table>
@@ -111,6 +136,8 @@
     .card input:focus, .card select:focus { outline: none; border-color: var(--red); box-shadow: 0 0 0 2px rgba(var(--red-rgb), 0.25); }
     .btn-verify { background: transparent; border: 1px solid var(--border); color: var(--text-muted); padding: 5px 12px; border-radius: 999px; font-size: 12px; cursor: pointer; }
     .btn-verify:hover { border-color: var(--red); background: rgba(var(--red-rgb),0.08); }
+    .pwd-row { display: none; }
+    .pwd-row.open { display: table-row; }
 </style>
 
 <script>

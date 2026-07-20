@@ -30,6 +30,9 @@ class Permissions
     // --- SMS: logs ---
     public const SMS_LOGS_VIEW = 'sms.logs.view';
 
+    // --- SMS: templates (editable message library) ---
+    public const SMS_TEMPLATES_MANAGE = 'sms.templates.manage';
+
     // --- SMS: contacts & groups ---
     public const CONTACTS_VIEW = 'contacts.view';
     public const CONTACTS_MANAGE = 'contacts.manage';
@@ -43,6 +46,7 @@ class Permissions
     public const TEAM_VIEW = 'team.view';
     public const TEAM_CREATE = 'team.create';
     public const TEAM_DELETE = 'team.delete';
+    public const TEAM_RESET_PASSWORD = 'team.reset_password';
 
     // --- Events schedule ---
     public const EVENTS_VIEW = 'events.view';
@@ -91,6 +95,9 @@ class Permissions
         'SMS · Logs' => [
             self::SMS_LOGS_VIEW,
         ],
+        'SMS · Templates' => [
+            self::SMS_TEMPLATES_MANAGE,
+        ],
         'SMS · Contacts & Groups' => [
             self::CONTACTS_VIEW,
             self::CONTACTS_MANAGE,
@@ -104,6 +111,7 @@ class Permissions
             self::TEAM_VIEW,
             self::TEAM_CREATE,
             self::TEAM_DELETE,
+            self::TEAM_RESET_PASSWORD,
         ],
         'Events schedule' => [
             self::EVENTS_VIEW,
@@ -154,6 +162,7 @@ class Permissions
         self::SMS_POST_VIEW => 'Open the post-funeral messages page',
         self::SMS_POST_SEND => 'Send post-funeral SMS',
         self::SMS_LOGS_VIEW => 'View the SMS campaign log',
+        self::SMS_TEMPLATES_MANAGE => 'Edit reusable SMS templates (thank-you, invitations, updates, post-funeral)',
         self::CONTACTS_VIEW => 'View saved contacts and contact groups',
         self::CONTACTS_MANAGE => 'Add, edit, delete contacts and groups (syncs to TextTango)',
         self::CONTACTS_IMPORT => 'Bulk import contacts from CSV or paste',
@@ -164,6 +173,7 @@ class Permissions
         self::TEAM_VIEW => 'View users belonging to your tenant',
         self::TEAM_CREATE => 'Invite new admins or users to your tenant',
         self::TEAM_DELETE => 'Remove users from your tenant',
+        self::TEAM_RESET_PASSWORD => 'Reset team members\' passwords',
 
         self::EVENTS_VIEW => 'View the funeral events schedule',
         self::EVENTS_MANAGE => 'Add, edit and remove events',
@@ -202,12 +212,14 @@ class Permissions
             self::SMS_POST_VIEW,
             self::SMS_POST_SEND,
             self::SMS_LOGS_VIEW,
+            self::SMS_TEMPLATES_MANAGE,
             self::CONTACTS_VIEW,
             self::CONTACTS_MANAGE,
             self::CONTACTS_IMPORT,
             self::TEAM_VIEW,
             self::TEAM_CREATE,
             self::TEAM_DELETE,
+            self::TEAM_RESET_PASSWORD,
             self::EVENTS_VIEW,
             self::EVENTS_MANAGE,
         ];

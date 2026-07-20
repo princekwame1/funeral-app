@@ -48,6 +48,27 @@ class AdminTeamController extends Controller
             ->with('team_flash', ['ok' => true, 'message' => "{$data['name']} added to your team as {$data['role']}."]);
     }
 
+    public function resetPassword(Request $request, int $userId)
+    {
+        $user = User::query()->find($userId); // TenantScope keeps this within tenant
+        abort_unless($user, 404, 'User not found in your tenant.');
+
+        if ($user->isSuper()) {
+            return back()->with('team_flash', ['ok' => false, 'message' => 'Only another super admin can reset a super\'s password.']);
+        }
+
+        $data = $request->validate([
+            'password' => ['required', 'string', 'min:8'],
+        ]);
+
+        $user->update(['password' => Hash::make($data['password'])]);
+
+        return back()->with('team_flash', [
+            'ok' => true,
+            'message' => "Password reset for {$user->name}. Share the new password with them privately.",
+        ]);
+    }
+
     public function destroy(Request $request, int $userId, CurrentTenant $current)
     {
         $tenant = $current->get();
